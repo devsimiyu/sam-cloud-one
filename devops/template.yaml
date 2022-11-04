@@ -1,0 +1,49 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+  
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+
+  Function:
+    Timeout: 3
+
+Resources:
+
+  HelloWorldGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      Description: Hello world API gateway
+      StageName: Dev
+
+  HelloWorldFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      Events:
+        HelloWorld:
+          Type: Api
+          Properties:
+            RestApiId: !Ref HelloWorldGateway
+            Path: /hello
+            Method: get
+    Metadata:
+      DockerTag: v1
+      DockerContext: ../hello-world
+      Dockerfile: Dockerfile
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+
+  HelloWorldGateway:
+    Description: "API Gateway endpoint URL for Dev stage for Hello World function"
+    Value: !Sub "https://${HelloWorldGateway}.execute-api.${AWS::Region}.amazonaws.com/Dev/hello/"
+
+  HelloWorldFunction:
+    Description: "Hello World Lambda Function ARN"
+    Value: !GetAtt HelloWorldFunction.Arn
+
+  HelloWorldFunctionIamRole:
+    Description: "Implicit IAM Role created for Hello World function"
+    Value: !GetAtt HelloWorldFunctionRole.Arn
